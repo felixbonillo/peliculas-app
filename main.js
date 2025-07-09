@@ -173,3 +173,71 @@ async function fetchAndRenderMovies(searchTerm = "", genreId = "") {
       '<p class="text-center text-red-500 col-span-full">No se pudieron cargar las películas.</p>';
   }
 }
+
+//Funciones para el modal de detalles de pelicula
+
+async function openMovieDetailsModal(movieId) {
+  try {
+    //Muestra un mensaje de carga dentro del modal
+    modalTitle.textContent = "Cargando detalles...";
+    modalOverview.textContent = "";
+    modalImage.src = TMDB_PLACEHOLDER_IMAGE;
+    modalReleaseDate.textContent = "Fecha de lanzamiento: ...";
+    modalRating.textContent = "Valoración: ...";
+    movieModal.classList.remove("hidden"); //Muestra el fondo oscuro del modal
+
+    //Obtener detalles completos de la pelicula
+    const response = await fetch(
+      `${TMDB_BASE_URL}/movie/${movieId}?api_key=${TMDB_API_KEY}&language=es-ES`
+    );
+    if (!response.ok) {
+      throw new Error("Error al obtener los detalles de la película");
+    }
+    const movieDetails = await response.json();
+
+    //Rellenar el modal con los detalles de la pelicula
+    modalImage.src = movieDetails.poster_path
+      ? `${TMDB_IMAGE_BASE_URL}${movieDetails.poster_path}`
+      : TMDB_PLACEHOLDER_IMAGE;
+    modalTitle.textContent = movieDetails.title || "Titulo desconocido";
+    modalReleaseDate.textContent = `Fecha de lanzamiento: ${
+      movieDetails.release_date || "Fecha desconocida"
+    }`;
+    modalRaiting.textContent = `Valoración: ${
+      movieDetails.vote_average ? movieDetails.vote_average.toFixed(1) : "N/A"
+    } / 10`;
+    modalOverview.textContent =
+      movieDetails.overview || "No hay sinopsis disponible.";
+  } catch (error) {
+    console.error("Error al obtener detalles de la película:", error);
+    showMessage(
+      "Error al cargar los detalles de la película. Por favor, inténtalo de nuevo más tarde.",
+      "error"
+    );
+    closeMovieDetailsModal();
+  }
+}
+
+//Funcion para cerrar el modal
+function closeMovieDetailsModal() {
+  movieModal.classList.add("hidden"); //Oculta el fondo oscuro del modal
+}
+
+//Event Listeners
+
+//Event Listener para el buscador ***Debounce aplicado***
+searchInput.addEventListener(
+  "input",
+  debounce(() => {
+    const searchTerm = searchInput.value.trim();
+    genreSelect.value = ""; //Resetea el selector de generos
+    fetchAndRenderMovies(searchTerm);
+  }, 500)
+); //Delay espera 500ms antes de ejecutar la funcion
+
+//Event listener para el selector de generos
+genreSelect.addEventListener("change", () => {
+  const genreId = genreSelect.value;
+  searchInput.value = ""; //Resetea el input de busqueda
+  fetchAndRenderMovies("", genreId);
+});
