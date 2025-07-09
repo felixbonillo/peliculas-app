@@ -105,7 +105,25 @@ function renderMovieCard(movie) {
 async function fetchAndRenderGenres() {
   try {
     const response = await fetch(`${TMDB_BASE_URL}/genre/movie/list?api_key=${TMDB_API_KEY}&language=es-ES`);
+    if (!response.ok) {
+      throw new Error("Error al obtener los géneros");
+    }
+    const data = await response.json();
+    genresList = data.genres; //Guarda la lista de generos
 
+    //Limpia y rellena el slector de generos
+    genreSelect.innerHTML = `<option value="">Todos los géneros</option>`; //Opcion por defecto
+    genresList.forEach(genre => {
+      const option = document.createElement("option");
+      option.value = genre.id;
+      option.textContent = genre.name;
+      genreSelect.appendChild(option);
+      
+    });
+
+  } catch (error) {
+    console.error(error);
+    showMessage("Error al cargar los géneros", "error");
   }
-  
 }
+
