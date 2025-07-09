@@ -70,9 +70,42 @@ function renderMovieCard(movie) {
   movieCard.dataset.movieId = movie.id; //Guarda el ID de la pelicula para el modal
 
   //Evalua con un ternario si la pelicula tiene un poster
-  const imageUrl = movie.poster_path ? `${TMDB_IMAGE_BASE_URL}${movie.poster_path}` : TMDB_PLACEHOLDER_IMAGE; // Usa la imagen del poster o una imagen de placeholder si no hay poster
-  
-  movieCard.innerHTML = `
-  `
+  const imageUrl = movie.poster_path
+    ? `${TMDB_IMAGE_BASE_URL}${movie.poster_path}`
+    : TMDB_PLACEHOLDER_IMAGE; // Usa la imagen del poster o una imagen de placeholder si no hay poster
 
+  movieCard.innerHTML = `
+    <img src= "${imageUrl}" alt"${
+    movie.title || "Pelicula sin titulo"
+  }" class="w-full h-64 object-cover">
+    <div class= "p-4
+    <h3 class="text-xl font-bold text-gray-100 mb-2 truncate">${
+      movie.title || "Titulo desconocido"
+    }</h3>
+    <p class="text-sm text-gray-400">
+      Lanzamiento: ${
+        movie.release_date ? movie.release_date : "Fecha desconocida"
+      }
+      </p>
+      <p class="text-sm text-yellow-400 mt-1 font-semibold">
+      Valoracion: ${
+        movie.vote_average ? movie.vote_average.toFixed(1) : "N/A"
+      } / 10
+    </p>
+    <button class="mt-4 w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800" data-id= "${
+      movie.id
+    }" data-action="view-details">
+      Ver Detalles
+    </button>
+  `;
+  return movieCard;
+}
+
+//Funcion para obtener y renderizar las peliculas en el selector de generos
+async function fetchAndRenderGenres() {
+  try {
+    const response = await fetch(`${TMDB_BASE_URL}/genre/movie/list?api_key=${TMDB_API_KEY}&language=es-ES`);
+
+  }
+  
 }
