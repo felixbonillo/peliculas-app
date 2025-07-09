@@ -104,7 +104,9 @@ function renderMovieCard(movie) {
 //Funcion para obtener y renderizar las peliculas en el selector de generos
 async function fetchAndRenderGenres() {
   try {
-    const response = await fetch(`${TMDB_BASE_URL}/genre/movie/list?api_key=${TMDB_API_KEY}&language=es-ES`);
+    const response = await fetch(
+      `${TMDB_BASE_URL}/genre/movie/list?api_key=${TMDB_API_KEY}&language=es-ES`
+    );
     if (!response.ok) {
       throw new Error("Error al obtener los géneros");
     }
@@ -113,17 +115,61 @@ async function fetchAndRenderGenres() {
 
     //Limpia y rellena el slector de generos
     genreSelect.innerHTML = `<option value="">Todos los géneros</option>`; //Opcion por defecto
-    genresList.forEach(genre => {
+    genresList.forEach((genre) => {
       const option = document.createElement("option");
       option.value = genre.id;
       option.textContent = genre.name;
       genreSelect.appendChild(option);
-      
     });
-
   } catch (error) {
     console.error(error);
-    showMessage("Error al cargar los géneros", "error");
+    showMessage("Error al cargar los géneros", error);
   }
 }
 
+//Funcion principal para obtener y renderizar las peliculas
+async function fetchAndRenderMovies(searchTerm = "", genreId = "") {
+  moviesContainer.innerHTML = ""; //Limpia el contenedor de peliculas
+  showMessage("Cargando películas...", "info");
+  hideMessage();
+  let url = "";
+  if (searchTerm) {
+    url = `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&language=es-ES&query=${encodeURIComponent(
+      searchTerm
+    )}`;
+  } else if (genreId) {
+    url = `${TMDB_BASE_URL}/discover/movie?api_key=${TMDB_API_KEY}&language=es-ES&with_genres=${genreId}`;
+  } else {
+    url = `${TMDB_BASE_URL}/movie/popular?api_key=${TMDB_API_KEY}&language=es-ES`;
+  }
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error("Error al obtener las películas");
+    }
+    const data = await response.json();
+    const movies = data.results;
+
+    moviesContainer.innerHTML = ""; //Limpia el contenedor de peliculas
+
+    if (movies.length === 0) {
+      showMessage("No se encontraron películas", "info");
+      return;
+    } else {
+      movies.forEach((movie) => {
+        const movieCard = renderMovieCard(movie);
+        moviesContainer.appendChild(movieCard);
+      });
+      hideMessage(); // Oculta el mensaje de carga
+    }
+  } catch (error) {
+    console.error(error);
+    showMessage(
+      "Error al cargar las películas. Por favor, intentalo de nuevo más tarde.",
+      "error"
+    );
+    moviesContainer.innerHTML =
+      '<p class="text-center text-red-500 col-span-full">No se pudieron cargar las películas.</p>';
+  }
+}
