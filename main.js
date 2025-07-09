@@ -8,7 +8,7 @@ const genreSelect = document.querySelector("#genre-select");
 
 //Referencias a los elementos del modal
 const movieModal = document.querySelector("#movie-modal");
-const modalCloseButton = document.querySelector("#modal-close-button");
+const modalCloseButton = document.querySelector("#modal-close-btn");
 const modalImage = document.querySelector("#modal-image");
 const modalTitle = document.querySelector("#modal-title");
 const modalReleaseDate = document.querySelector("#modal-release-date");
@@ -203,7 +203,7 @@ async function openMovieDetailsModal(movieId) {
     modalReleaseDate.textContent = `Fecha de lanzamiento: ${
       movieDetails.release_date || "Fecha desconocida"
     }`;
-    modalRaiting.textContent = `Valoración: ${
+    modalRating.textContent = `Valoración: ${
       movieDetails.vote_average ? movieDetails.vote_average.toFixed(1) : "N/A"
     } / 10`;
     modalOverview.textContent =
@@ -241,3 +241,43 @@ genreSelect.addEventListener("change", () => {
   searchInput.value = ""; //Resetea el input de busqueda
   fetchAndRenderMovies("", genreId);
 });
+
+//Event listener para manejar clics en las tarjetas de peliculas
+moviesContainer.addEventListener("click", (event) => {
+  const target = event.target;
+  //Si se hizo clic en el boton de ver detalles
+  if (target.tagName === "BUTTON" && target.dataset.action === "view-details") {
+    const movieId = target.dataset.id;
+    openMovieDetailsModal(movieId);
+  }
+  //Si se hizo clic en la tarjeta de pelicula
+  else {
+    //Busca el padre mas cercano que sea una tarjeta de pelicula
+    const movieCard = target.closest(".rounded-lg.shadow-lg.overflow-hidden");
+    if (movieCard && movieCard.dataset.movieId) {
+      const movieId = movieCard.dataset.movieId;
+      openMovieDetailsModal(movieId);
+    }
+  }
+});
+
+//Event listener para cerrar el modal
+modalCloseButton.addEventListener("click", closeMovieDetailsModal);
+
+
+//Event listener para cerrar el modal al hacer clic fuera de el
+movieModal.addEventListener("click", (event) => {
+  if (event.target === movieModal) {
+    // Si se hizo clic en el fondo del modal
+    closeMovieDetailsModal();
+  }
+});
+
+//Inicializar la aplicacion
+document.addEventListener("DOMContentLoaded", () => {
+  fetchAndRenderGenres();
+  fetchAndRenderMovies(); // Carga las peliculas populares al inicio
+});
+// Nota: La funcion fetchAndRenderMovies se llama sin parametros para cargar las peliculas populares al inicio
+// y se actualiza con los parametros de busqueda o genero cuando el usuario interactua con el buscador o el selector de generos.
+// La funcion fetchAndRenderGenres se llama al inicio para cargar los generos disponibles en el selector.
